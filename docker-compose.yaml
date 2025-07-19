@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./Scratch2025.API
+      dockerfile: Dockerfile
+    ports:
+      - "5100:8080"
+    container_name: scratch-backend
+
+  frontend:
+    build:
+      context: ./Scracth2025.UI
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    container_name: scratch-frontend
+  db:
+    container_name: db_scratch_2025
+    image: bitnami/postgresql:14
+    ports:
+    - '5432:5432'
+    environment:
+    - POSTGRESQL_USERNAME=postgres
+    - POSTGRES_PASSWORD=totopassword1234
+    - POSTGRESQL_PGAUDIT_LOG=READ,WRITE
+    - POSTGRESQL_LOG_HOSTNAME=true
+    - POSTGRESQL_REPLICATION_MODE=master
+    - POSTGRESQL_REPLICATION_USER=repl_user
+    - POSTGRESQL_REPLICATION_PASSWORD=repl_password
+
+    - ALLOW_EMPTY_PASSWORD=yes
+  pubsub:
+    container_name: pubsub_scratch_2025
+    image: neowaylabs/gcloud-pubsub-emulator        
+    ports:
+        - 8085:8085
