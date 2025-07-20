@@ -1,29 +1,33 @@
-# Consultez https://aka.ms/customizecontainer pour savoir comment personnaliser votre conteneur de débogage et comment Visual Studio utilise ce Dockerfile pour générer vos images afin d’accélérer le débogage.
-
-# Cet index est utilisé lors de l’exécution à partir de VS en mode rapide (par défaut pour la configuration de débogage)
+# Étape 1 : Image de base pour runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-
-# Cette phase est utilisée pour générer le projet de service
+# Étape 2 : Build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Scratch2025.API.csproj", "."]
-RUN dotnet restore "./Scratch2025.API.csproj"
-COPY . .
-WORKDIR "/src/."
-RUN dotnet build "./Scratch2025.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# Cette étape permet de publier le projet de service à copier dans la phase finale
+# Copie des .csproj uniquement
+COPY ["Scratch2025.API/Scratch2025.API.csproj", "Scratch2025.API/"]
+COPY ["Scracth2025.DATABASE/Scracth2025.DATABASE.csproj", "Scracth2025.DATABASE/"]
+
+# Restauration
+RUN dotnet restore "Scratch2025.API/Scratch2025.API.csproj"
+
+# Copie du reste du code
+COPY . .
+
+WORKDIR "/src/Scratch2025.API"
+RUN dotnet build "Scratch2025.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+# Étape 3 : Publication
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Scratch2025.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Scratch2025.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Cette phase est utilisée en production ou lors de l’exécution à partir de VS en mode normal (par défaut quand la configuration de débogage n’est pas utilisée)
+# Étape 4 : Image finale
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .

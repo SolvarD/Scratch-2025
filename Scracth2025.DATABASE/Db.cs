@@ -7,6 +7,9 @@ namespace Scracth2025.DATABASE;
 
 public class Db : DbContext
 {
+	public Db(DbContextOptions<Db> options) : base(options)
+	{
+	}
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		// Apply specific configurations from all IEntityTypeConfiguration<T> instances defined in Database folder

@@ -7,14 +7,14 @@ public static class DbExtensions
 {
     public static void AddDb(this IServiceCollection services, DbOptions options)
     {
-        var connectionStringUri = new Uri(options.ConnectionString);
-        var (user, pwd) = UrlExtractUserAndPwd(connectionStringUri);
-        var dbName = connectionStringUri.AbsolutePath[1..]; //remove leading slash
-        var connectionString = $"Host={connectionStringUri.Host};Port={connectionStringUri.Port};Username={user};Password={pwd};Database={dbName};Include Error Detail=true";
+        //var connectionStringUri = new Uri(options.ConnectionString);
+        //var (user, pwd) = UrlExtractUserAndPwd(connectionStringUri);
+        //var dbName = connectionStringUri.AbsolutePath[1..]; //remove leading slash
+        //var connectionString = $"Host={connectionStringUri.Host};Port={connectionStringUri.Port};Username={user};Password={pwd};Database={dbName};Include Error Detail=true";
 
         services.AddDbContext<Db>(opt =>
         {
-            opt.UseNpgsql(connectionString);
+            opt.UseNpgsql(options.ConnectionString);
             opt.UseLazyLoadingProxies();
         });
     }
